@@ -41,8 +41,8 @@
     "dependencies": {
       "minUI5Version": "1.60.0",
       "libs": {
-        "sap.ui.core": {},
         "sap.m": {},
+        "sap.ui.core": {},
         "sap.ui.layout": {}
       }
     },
@@ -81,14 +81,24 @@
           "target": ["home"]
         },
         {
-          "pattern": "todo/{todoId}",
-          "name": "todo",
-          "target": ["todo"]
+          "pattern": "settings",
+          "name": "settings",
+          "target": ["settings"]
         },
         {
-          "pattern": "todo-form",
-          "name": "todo-form",
-          "target": ["todo-form"]
+          "pattern": "new-settings",
+          "name": "new-settings",
+          "target": ["new-settings"]
+        },
+        {
+          "pattern": "rollback",
+          "name": "rollback",
+          "target": ["rollback"]
+        },
+        {
+          "pattern": "new-rollback",
+          "name": "new-rollback",
+          "target": ["new-rollback"]
         },
         {
           "pattern": "about",
@@ -98,22 +108,32 @@
       ],
       "targets": {
         "home": {
-          "viewName": "Home",
+          "viewName": "home",
           "viewId": "home",
           "viewLevel": 1
         },
-        "todo": {
-          "viewName": "Todo",
-          "viewId": "todo",
+        "settings": {
+          "viewName": "settings",
+          "viewId": "settings",
           "viewLevel": 2
         },
-        "todo-form": {
-          "viewName": "TodoForm",
-          "viewId": "todo-form",
+        "new-settings": {
+          "viewName": "settings",
+          "viewId": "new-settings",
+          "viewLevel": 2
+        },
+        "rollback": {
+          "viewName": "settings",
+          "viewId": "rollback",
+          "viewLevel": 2
+        },
+        "new-rollback": {
+          "viewName": "settings",
+          "viewId": "new-rollback",
           "viewLevel": 2
         },
         "about": {
-          "viewName": "About",
+          "viewName": "about",
           "viewId": "about",
           "viewLevel": 2
         }

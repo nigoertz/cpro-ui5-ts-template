@@ -1,5 +1,15 @@
-<mvc:View controllerName="cpro.ui5.__kunde__.__projekt__.controller.Home" displayBlock="true" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc">
-	<Page>
+<mvc:View 
+	controllerName="cpro.ui5.__kunde__.__projekt__.controller.Home" 
+	displayBlock="true" 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:grid="sap.ui.layout.cssgrid"
+	xmlns:f="sap.f"
+	xmlns:t="sap.tnt">
+
+	<Page backgroundDesign="Transparent">
+		
 		<customHeader>
 			<OverflowToolbar>
 				<Image src="assets/logo.jpg" height="30px" />
@@ -7,57 +17,24 @@
 				<ToolbarSpacer />
 				<Button icon="sap-icon://key-user-settings" tooltip="Administration" press="openSettings" />
 			</OverflowToolbar>
-
 		</customHeader>
+		
+		<Panel width="100%" backgroundDesign="Transparent">
+			<content>
+				<f:GridList id="gridList" items="{/items}">
+					<f:GridListItem highlight="{stateColorHightlight}" press="onGridItemPress">
+						<HBox class="sapUiSmallMargin" justifyContent="End">
+							<t:InfoLabel 
+								text="{stateText}" 
+								colorScheme="{stateColorInfoLabel}"/>
+						</HBox>
+						<VBox alignItems="Center" class="sapUiMediumMarginBottom">
+							<Button text="{title}" press="onGridItemPress" type="Ghost" icon="{icon}"></Button>
+						</VBox>
+					</f:GridListItem>
+				</f:GridList>
+			</content>
+		</Panel>
 
-		<content>
-			<Table id="table-users" inset="false" items="{todo>/collection}">
-				<headerToolbar>
-					<OverflowToolbar>
-						<content>
-							<Title text="{i18n>table-users-title}" />
-							<ToolbarSpacer />
-							<Button icon="sap-icon://excel-attachment" tooltip="{i18n>table-users-toolbar-download}" press="onPressExport" />
-							<Button type="Transparent" tooltip="{i18n>table-users-toolbar-sort}" icon="sap-icon://sort" press="onOpenSorterDialog" />
-							<SearchField width="14rem" liveChange="onSearch" />
-							<Button type="Ghost" icon="sap-icon://add" tooltip="{i18n>table-users-toolbar-new-todo}" press="navToNewTodoForm" />
-						</content>
-					</OverflowToolbar>
-				</headerToolbar>
-				<columns>
-					<Column width="8em" hAlign="Center">
-						<Text text="{i18n>table-users-column-userid}" />
-					</Column>
-					<Column width="8em" hAlign="Center" minScreenWidth="Tablet" demandPopin="true">
-						<Text text="{i18n>table-users-column-todoId}" />
-					</Column>
-					<Column minScreenWidth="Desktop" demandPopin="true">
-						<Text text="{i18n>table-users-column-todoTitle}" />
-					</Column>
-					<Column minScreenWidth="Desktop" demandPopin="true" hAlign="Center">
-						<Text text="{i18n>table-users-column-todoDone}" />
-					</Column>
-				</columns>
-				<items>
-					<ColumnListItem type="Navigation" press="onPressTableItem" vAlign="Middle">
-						<cells>
-							<Text text="{todo>userId}" />
-							<Text text="{todo>id}" />
-							<ObjectIdentifier title="{todo>title}" text="{todo>description}" />
-							<CheckBox selected="{todo>completed}" />
-						</cells>
-					</ColumnListItem>
-				</items>
-			</Table>
-		</content>
-		<footer>
-			<OverflowToolbar>
-				<Button icon="sap-icon://bell" text="{= ${messages>/collection}.length }" visible="{= ${messages>/collection}.length > 0 }" press="toggleMessageManager" />
-				<ToolbarSpacer />
-				<Button icon="sap-icon://hint" type="Ghost" press="onPressInfoButton" />
-				<Button text="{i18n>label-save}" type="Accept" press="onPressSuccessButton" />
-				<Button text="{i18n>label-cancel}" type="Reject" press="onPressCancelButton" />
-			</OverflowToolbar>
-		</footer>
 	</Page>
 </mvc:View>

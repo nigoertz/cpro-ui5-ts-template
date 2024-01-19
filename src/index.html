@@ -10,13 +10,21 @@
       src="resources/sap-ui-core.js"
       data-sap-ui-theme="sap_fiori_3_dark"
       data-sap-ui-resourceroots='{
-				"cpro.ui5.__kunde__.__projekt__": "./"
-			}'
+        "cpro.ui5.__kunde__.__projekt__": "./"
+      }'
       data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"
       data-sap-ui-compatVersion="edge"
       data-sap-ui-async="true"
       data-sap-ui-frameOptions="trusted"
     ></script>
+
+    <script>
+      // Configure OpenUI5 logging after initialization
+      sap.ui.getCore().attachInit(function() {
+        // Set the log level to "ERROR" to suppress less critical messages
+        jQuery.sap.log.setLevel(jQuery.sap.log.Level.ERROR);
+      });
+    </script>
   </head>
 
   <body class="sapUiBody">

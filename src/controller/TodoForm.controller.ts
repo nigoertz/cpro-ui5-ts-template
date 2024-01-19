@@ -1,15 +1,13 @@
 import BaseController from './BaseController';
-import { todoModel, messageModel } from '../model/provider';
+import { settingsModel, messageModel } from '../model/provider';
 import MessageToast from 'sap/m/MessageToast';
 import Core from 'sap/ui/core/Core';
-
+import JSONModel from 'sap/ui/model/json/JSONModel';
+import Helper from './Helper';
 import InputBase from 'sap/m/InputBase';
 
 interface AppFormError {
-  errorFieldPlaceholder: string;
-  errorFieldDescription: string;
-  errorFieldGroupIds: string[];
-  errorFieldId: string;
+  errorFieldTitle: string;
 }
 
 /**
@@ -17,33 +15,74 @@ interface AppFormError {
  */
 export default class TodoFormController extends BaseController {
   onInit() {
-    todoModel.register(this);
+    this.performInitalization();
+  }
+
+  performInitalization(){
+    settingsModel.register(this);
     messageModel.register(this);
+    const jsonData = JSON.parse(settingsModel.getProperty('/form').content);
+    const oData = new Helper().flattenJSON(jsonData);
+    const oModel = new JSONModel(oData);
+    this.getView().setModel(oModel);
+
+    // Set the default title as a placeholder
+    const initialForm = settingsModel.getProperty('/form');
+
+    const codeEditorContent = this.getView().byId('CodeEditorBasic');
+    codeEditorContent.setValue(codeEditorContent.content);
+
+    const todoTitleInput = this.getView().byId('todoTitle');
+    todoTitleInput.setPlaceholder(initialForm.title);
+  }
+
+  onUpdateInputField(oEvent: Event) {
+    const oInput = oEvent.getSource();
+    const sValue = oInput.getValue();
+
+    // Get the binding context to determine the path
+    const oContext = oInput.getBindingContext();
+    const sPath = oContext.getPath();
+
+    // Update the model directly
+    oInput.getModel().setProperty(sPath + "/value", sValue);
+
+    // Rest of your code...
+    var unflattendJSON = "{}";
+    const oTreeTable = this.getView().byId("TreeTableBasic");
+    unflattendJSON = new Helper().unflattenJSON(oTreeTable.getModel().oData);
+
+    this.getView().getModel("todo").setProperty("/form/content", JSON.stringify(unflattendJSON, null, 2));
   }
 
   onPressAcceptButton() {
-    const formErrors = this.handleContactFormValidation();
+    const formErrors = this.handlesettingsFormValidation();
     if (formErrors.length === 0) {
-      todoModel.addFormToCollection();
-      MessageToast.show('Todo added!');
-      messageModel.addSuccessMessage({ message: 'Todo added successfully' });
+      settingsModel.addToCollection(3);
+      MessageToast.show('Setting added!');
+      messageModel.addSuccessMessage({ message: 'Setting added successfully' });
       return this.navToHome();
     }
 
     formErrors.forEach((error) => {
       messageModel.addErrorMessage({
-        message: `Form errors at ${error.errorFieldGroupIds}`,
-        description: `Field ID: \n ${error.errorFieldId} \n \n Error description: \n ▹ ${error.errorFieldPlaceholder} \n ▹ ${error.errorFieldDescription}`,
+        message: `Form errors at ${error.errorFieldTitle}`,
+        description: `Error title▹ ${error.errorFieldTitle}`,
       });
     });
-    MessageToast.show('Could not create Todo!');
+    MessageToast.show('Could not create Setting!');
   }
 
-  handleContactFormValidation() {
-    const contactFormFields = Core.byFieldGroupId(
+  onPressRejectButton(){
+    this.performInitalization();
+    this.navToHome();
+  }
+
+  handlesettingsFormValidation() {
+    const settingsFormFields = Core.byFieldGroupId(
       'todoFormInput',
     ) as InputBase[];
-    const contactFormErrors: AppFormError[] = [];
+    const settingsFormErrors: AppFormError[] = [];
 
     const checkFieldForValidity = (formField: InputBase) => {
       const isRequiredField = formField.getProperty('required');
@@ -53,7 +92,7 @@ export default class TodoFormController extends BaseController {
     };
 
     const addEntryToFormErrors = (formField: InputBase) => {
-      contactFormErrors.push({
+      settingsFormErrors.push({
         errorFieldPlaceholder: formField.getProperty('placeholder'),
         errorFieldDescription: formField.getProperty('valueStateText'),
         errorFieldGroupIds: formField.getProperty('fieldGroupIds'),
@@ -61,7 +100,7 @@ export default class TodoFormController extends BaseController {
       });
     };
 
-    contactFormFields
+    settingsFormFields
       .filter((formField: InputBase) => {
         return !formField.getId().includes('popup');
       })
@@ -73,6 +112,6 @@ export default class TodoFormController extends BaseController {
         }
       });
 
-    return contactFormErrors;
+    return settingsFormErrors;
   }
 }

@@ -1,9 +1,9 @@
-import TodoModel from './Todo.model';
+import SettingsModel from './Settings.model';
 import ConfigModel from './Config.model';
 import MessageModel from './Message.model';
 
-const todoModel = new TodoModel('todo');
+const settingsModel = new SettingsModel('todo');
 const configModel = new ConfigModel('config');
 const messageModel = new MessageModel('messages');
 
-export { todoModel, configModel, messageModel };
+export { settingsModel, configModel, messageModel };

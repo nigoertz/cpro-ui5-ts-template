@@ -1,101 +1,95 @@
 import Event from 'sap/ui/base/Event';
-import ManagedObject from 'sap/ui/base/ManagedObject';
-import Filter from 'sap/ui/model/Filter';
-import FilterOperator from 'sap/ui/model/FilterOperator';
 import BaseController from './BaseController';
-import { todoModel, messageModel } from '../model/provider';
+import { settingsModel, messageModel } from '../model/provider';
 import {
   AppBinding,
   AppEventProvider,
   AppSortEventParameters,
 } from '../@types/UI5Shims';
 import Dialog from 'sap/m/Dialog';
-import Fragment from 'sap/ui/core/Fragment';
-import Sorter from 'sap/ui/model/Sorter';
+import JSONModel from 'sap/ui/model/json/JSONModel';
 
 /**
  * @namespace cpro.ui5.__kunde__.__projekt__.controller.Home
  */
 export default class HomeController extends BaseController {
-  private homeDialogTableFilterPath =
-    'cpro/ui5/__kunde__/__projekt__/view/Fragments/TableFilter';
-  private homeDialogTableSorterPath =
-    'cpro/ui5/__kunde__/__projekt__/view/Fragments/TodoTableSorter';
 
-  private homeDialogs: Record<string, Dialog> = {};
+  private settingsTitle: string;
+  private rollbackTitle: string;
+  private collection: any;
+  private oResourceBundle: any;
 
   onInit() {
     messageModel.register(this);
-    todoModel.register(this);
-    todoModel.syncTodos();
+    settingsModel.register(this);
+    this.createGridItems();
+
+    this.getView().addEventDelegate({
+      onAfterShow: this.onAfterShowHandler.bind(this)
+   });
   }
 
-  onPressTableItem(event: Event) {
-    const todoPath = (event.getSource() as ManagedObject)
-      .getBindingContext('todo')
-      .getPath();
-    const todoItem = todoModel.getProperty(todoPath);
-    this.getRouter().navTo('todo', { todoId: todoItem.id });
+  onAfterShowHandler() {
+    this.collection = settingsModel.getCollection();
+    this.createGridItems();
   }
 
-  onSearch(event: Event) {
-    const query = (event.getSource() as AppEventProvider).getValue();
-    const filterProps = ['title', 'description'];
-    const appliedFilters: Filter[] = [];
-    const tableControl = this.getView().byId('table-users');
+  createGridItems(){
+    this.collection = settingsModel.getCollection();
 
-    if (query) {
-      filterProps.forEach((key) =>
-        appliedFilters.push(new Filter(key, FilterOperator.Contains, query)),
-      );
+    this.oResourceBundle = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+    this.settingsTitle = this.oResourceBundle.getText("grid-item-current");
+    this.rollbackTitle = this.oResourceBundle.getText("grid-item-rollback");
+
+    var gritItems = `{"items": [{
+        "title": "${this.settingsTitle}",
+        "icon": "sap-icon://action-settings",
+        "function": "toSetting",
+        "stateText": "${this.getStateText(1)}",
+        "stateColorInfoLabel": ${this.getStateColorInfoLabel(1)},
+        "stateColorHightlight": "${this.getStateColorHightlight(1)}"
+
+      },{
+        "title": "${this.rollbackTitle }",
+        "icon": "sap-icon://undo",
+        "function": "toRollback",
+        "stateText": "${this.getStateText(2)}",
+        "stateColorInfoLabel": ${this.getStateColorInfoLabel(2)},
+        "stateColorHightlight": "${this.getStateColorHightlight(2)}"
+      }]}`
+
+    var oModel = new JSONModel(JSON.parse(gritItems));
+    this.getView().setModel(oModel);
+  }
+
+  getStateText(id: int){
+    let notPresent = this.oResourceBundle.getText("table-settings-column-not-present");
+    let active = this.oResourceBundle.getText("table-settings-column-active");
+    let inActive = this.oResourceBundle.getText("table-settings-column-inactive");
+    return !this.collection.some(element => element.id === id) ? notPresent : this.collection.find(element => element.id === id && element.active) ? active : inActive
+  }
+
+  getStateColorInfoLabel(id: int){
+    return !this.collection.some(element => element.id === id) ? 1 : this.collection.find(element => element.id === id && element.active) ? 0 : 3
+  }
+
+  getStateColorHightlight(id: int){
+    return !this.collection.some(element => element.id === id) ? "Warning" : this.collection.find(element => element.id === id && element.active) ? "Success" : "Error"
+  }
+
+  onGridItemPress(oEvent: Event){
+    var oButton = oEvent.getSource();
+    var buttonText = oButton.getProperty("text");
+    var path = this.determinePath(buttonText);
+    this.getOwnerComponent().getRouter().navTo(path);      
+  }
+
+  determinePath(buttonText: string): string {
+    if (buttonText === this.settingsTitle) {
+      return this.collection.find(element => element.id === 1) ? "settings" : "new-settings";
+    } else {
+      return this.collection.find(element => element.id === 2) ? "rollback" : "new-rollback";
     }
-
-    (tableControl.getBinding('items') as AppBinding).filter(
-      appliedFilters.length === 0 ? [] : new Filter(appliedFilters, false),
-    );
   }
-
-  async onOpenSorterDialog() {
-    const view = this.getView();
-
-    if (!this.homeDialogs[this.homeDialogTableSorterPath]) {
-      this.homeDialogs[this.homeDialogTableSorterPath] = (await Fragment.load({
-        name: this.homeDialogTableSorterPath,
-        controller: this,
-      })) as Dialog;
-      view.addDependent(this.homeDialogs[this.homeDialogTableSorterPath]);
-    }
-    this.homeDialogs[this.homeDialogTableSorterPath].open();
-  }
-
-  sortTodos(event: Event) {
-    const tableControl = this.getView().byId('table-users');
-    const parameters = event.getParameters() as AppSortEventParameters;
-    const key = parameters.sortItem.getKey();
-    const descending: boolean = parameters.sortDescending;
-    const sorters = [];
-    sorters.push(new Sorter(key, descending));
-    (tableControl.getBinding('items') as AppBinding).sort(sorters);
-  }
-
-  onPressExport() {
-    todoModel.exportTodosToExcel();
-    messageModel.addInfoMessage({
-      message: 'You exported your todos as an excel file',
-    });
-  }
-  onPressInfoButton() {
-    messageModel.addInfoMessage({
-      message: 'You pressed the INFO button',
-      description: 'Here goes an informatic description',
-    });
-  }
-  onPressSuccessButton() {
-    messageModel.addSuccessMessage({
-      message: 'You pressed the SUCCESS button',
-    });
-  }
-  onPressCancelButton() {
-    messageModel.addErrorMessage({ message: 'You pressed the CANCEL button' });
-  }
+  
 }
