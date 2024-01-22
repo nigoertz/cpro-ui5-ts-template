@@ -10,19 +10,19 @@ export default class Helper {
                 const value = jsonObject[property];
 
                 if (typeof value === "object" && value !== null) {
-                    if (property === "sap" || property === "shipcloud") {
-                        const topLevelItem: any = {
-                            property: property,
-                            value: "",
-                            children: []
-                        };
-                        const childItems = this.createChildItems(
-                            value,
-                            topLevelItem.property
-                        );
-                        topLevelItem.children = childItems;
-                        result.push(topLevelItem);
-                    }
+                    //if (property === "sap" || property === "shipcloud") {
+                    const topLevelItem: any = {
+                        property: property,
+                        value: "",
+                        children: []
+                    };
+                    const childItems = this.createChildItems(
+                        value,
+                        topLevelItem.property
+                    );
+                    topLevelItem.children = childItems;
+                    result.push(topLevelItem);
+                    //}
                 }
             }
         }

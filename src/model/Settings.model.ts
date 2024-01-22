@@ -54,6 +54,7 @@ let collection = [
     active: false,
   },
 
+  /*
   {
     id: 1,
     content: `{
@@ -147,6 +148,7 @@ let collection = [
         }`,
     active: true,
   },
+  */
 ];
 
 /**
@@ -171,19 +173,27 @@ export default class SettingsModel extends BaseModel<Settings> {
     this.setCollection(settingsCollection);
   }
 
-  public updateEntry(id: int, content: string, activeState: boolean) {
-    //collection[id] = new Settings(id, content, activeState)
-    this.setCollection(collection);
-  }
+  public addOrUpdateToCollection(id: int, content: string) {
+    const existingEntry = collection.find((item) => item.id === id);
 
-  public addToCollection(id: int, content: string) {
-    //collection.push(id, content, false);
+    if (!existingEntry) {
+      const newSettings: Settings = {
+        id: id,
+        content: content,
+        active: false
+      }
+      collection.push(newSettings);
+    } else {
+      existingEntry.content = content;
+    }
+
     this.setCollection(collection);
   }
 
   public setSettingsActive(id: int){
     collection.forEach(element => element.active = false);
-    collection[id].active = true;
+    const existingEntry = collection.find((item) => item.id === id);
+    existingEntry.active = true;
     this.setCollection(collection);
   }
 

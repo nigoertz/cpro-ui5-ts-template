@@ -59,7 +59,7 @@
             <m:OverflowToolbar>
                 <m:Button text="{i18n>label-activate}" type="Emphasized" press="onActivate" />
                 <m:Button text="{i18n>label-convert}"  type="Ghost"      press="onConvert" />
-                <m:Button icon="sap-icon://delete"     type="Reject"     press="onDelete" visible="true"/>
+                <m:Button icon="sap-icon://delete" type="Reject"     press="onDelete" visible="{view>/isDeleteButtonVisible}"/>
                 <m:ToolbarSpacer />
                 <m:Button text="{i18n>label-save}"     type="Accept"     press="onSave" />
                 <m:Button text="{i18n>label-cancel}"   type="Reject"     press="onReject" />

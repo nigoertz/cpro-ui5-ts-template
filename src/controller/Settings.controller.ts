@@ -1,12 +1,8 @@
 import BaseController from './BaseController';
 import { settingsModel, messageModel } from '../model/provider';
 import Event from 'sap/ui/base/Event';
-import MessageToast from 'sap/m/MessageToast';
 import JSONModel from 'sap/ui/model/json/JSONModel';
 import Helper from './Helper';
-import Button from 'sap/m/Button';
-import VBox from 'sap/m/VBox';
-import Text from 'sap/m/Text';
 
 /**
  * @namespace cpro.ui5.__kunde__.__projekt__.controller.Settings
@@ -17,40 +13,49 @@ export default class SettingsController extends BaseController {
   private routeName: string;
 
   onInit() {
-    const parts = window.location.href.split("/");
-    this.routeName = parts[parts.length - 1];
+    this.performInitalization();
+
+    this.getView().addEventDelegate({
+      onAfterShow: this.onAfterShowHandler.bind(this)
+    });
+  }
+
+  onAfterShowHandler() {
     this.performInitalization();
   }
 
   performInitalization(){
+    const parts = window.location.href.split("/");
+    this.routeName = parts[parts.length - 1];
+
     settingsModel.register(this);
     messageModel.register(this);
 
     let route = this.getRouter().getRoute(this.routeName);
     let title;
-
+    let isDeleteButtonVisible = true;
     const oResourceBundle = this.getOwnerComponent().getModel("i18n").getResourceBundle();
 
     switch (this.routeName) {
       case 'settings':
-        title = oResourceBundle.getText("view-modify-settings")
+        title = oResourceBundle.getText("view-modify-settings");
         break;
       case 'new-settings':
         title = oResourceBundle.getText("view-create-settings");
+        isDeleteButtonVisible = false;
         break;
       case 'rollback':
         title = oResourceBundle.getText("view-modify-rollback");
         break;
       case 'new-rollback':
         title = oResourceBundle.getText("view-create-rollback");
-        break;
-      default:
-        this.settingsJSON = {};
+        isDeleteButtonVisible = false;
         break;
     }
 
-    var oViewModel = new JSONModel({
-      title: title
+    const oViewModel = new JSONModel({
+      title: title,
+      isDeleteButtonVisible: isDeleteButtonVisible,
     });
 
     this.getView().setModel(oViewModel, "view");
@@ -68,13 +73,6 @@ export default class SettingsController extends BaseController {
       const oModel = new JSONModel(oData);
       this.getView().setModel(oModel);
     });
-
-    //this.getView().byId("popupDialog").setModel(new JSONModel("{}"), "settings");
-  }
-
-  onRouteMatched(oEvent: Event): string {
-    var sRouteName = oEvent.getParameter("name");
-    return sRouteName;
   }
 
   async getSettingsJSON(oEvent: Event): Promise<void> {
@@ -97,35 +95,28 @@ export default class SettingsController extends BaseController {
         settingsModel.setModelFromCollection(0);
         this.settingsJSON = collection[0]?.content;
         break;
-      default:
-        this.settingsJSON = {};
-        break;
     }
 
     this.getView().getModel("todo").setProperty("/codeEditorVisible", false);
   }
 
   onUpdateInputField(oEvent: Event) {
-    const oInput = oEvent.getSource();
-    const sValue = oInput.getValue();
-    const oContext = oInput.getBindingContext();
-    const sPath = oContext.getPath();
-
-    oInput.getModel().setProperty(sPath + "/value", sValue);
-
-    const oTreeTable = this.getView().byId("TreeTableBasic");
-    var unflattendJSON = new Helper().unflattenJSON(oTreeTable.getModel().oData);
-    this.getView().getModel("todo").setProperty("/activeItem/content", JSON.stringify(unflattendJSON, null, 2));
+    this.handleInputChange(oEvent, "value");
   }
 
   onUpdatePropertyInputField(oEvent: Event) {
+    this.handleInputChange(oEvent, "property");
+  }
+
+  handleInputChange(oEvent: Event, propertyType: string) {
     const oInput = oEvent.getSource();
     const sValue = oInput.getValue();
     const oContext = oInput.getBindingContext();
     const sPath = oContext.getPath();
+    const propertyName = (propertyType === "property") ? "property" : "value";
 
-    oInput.getModel().setProperty(sPath + "/property", sValue);
-    
+    oInput.getModel().setProperty(sPath + "/" + propertyName, sValue);
+
     const oTreeTable = this.getView().byId("TreeTableBasic");
     var unflattendJSON = new Helper().unflattenJSON(oTreeTable.getModel().oData);
     this.getView().getModel("todo").setProperty("/activeItem/content", JSON.stringify(unflattendJSON, null, 2));
@@ -140,23 +131,22 @@ export default class SettingsController extends BaseController {
   onActivate() {
     var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
     this.openDialog(
-      oResourceBundle.getText(this.routeName === "rollback" || this.routeName === "new-rollback" ?
-        "dialog-text-activate-rollback" : 
-        "dialog-text-activate-setting"
-      ),
+      oResourceBundle.getText(this.routeName === "rollback" || this.routeName === "new-rollback" ? "dialog-text-activate-rollback" : "dialog-text-activate-setting"),
       oResourceBundle.getText("label-activate"),
       oResourceBundle.getText("label-cancel"),
       "Emphasized",
       "Transparent",
       (buttonPressed) => {
         if (buttonPressed === "primary") {
+          let content = this.getView().getModel("todo").getProperty("/activeItem/content");
+
           switch (this.routeName) {
             case 'new-settings':
-              settingsModel.addToCollection(1, this.settingsJSON);
+              settingsModel.addOrUpdateToCollection(1, content);
               settingsModel.setSettingsActive(1);
               break;
             case 'new-rollback':
-              settingsModel.addToCollection(2, this.settingsJSON);
+              settingsModel.addOrUpdateToCollection(2, content);
               settingsModel.setSettingsActive(2);
               break;
             case 'settings':
@@ -168,8 +158,7 @@ export default class SettingsController extends BaseController {
           }
           this.navToHome();
         }
-      }
-    );
+    });
   }
 
   onConvert(){
@@ -185,14 +174,23 @@ export default class SettingsController extends BaseController {
       "Transparent",
       (buttonPressed) => {
         if (buttonPressed === "primary") {
+          let content = this.getView().getModel("todo").getProperty("/activeItem/content");
+
           switch (this.routeName) {
-            case 'new-settings' || 'settings':
-              settingsModel.addToCollection(1, this.settingsJSON);
+            case 'new-settings':
+              settingsModel.addOrUpdateToCollection(2, content);
               break;
-            case 'new-rollback' || 'rollback':
-              settingsModel.addToCollection(2, this.settingsJSON);
+            case 'new-rollback':
+              settingsModel.addOrUpdateToCollection(1, content);
+              break;
+            case 'settings':
+              settingsModel.addOrUpdateToCollection(2, content);
+              break;
+            case 'rollback':
+              settingsModel.addOrUpdateToCollection(1, content);
               break;
           }
+          this.navToHome();
         }
       }
     );
@@ -235,14 +233,24 @@ export default class SettingsController extends BaseController {
       "Default",
       (buttonPressed) => {
         if (buttonPressed === "primary") {
+
+          let content = this.getView().getModel("todo").getProperty("/activeItem/content");
+          
           switch (this.routeName) {
-            case 'new-settings' || 'settings':
-              settingsModel.addToCollection(1, this.settingsJSON);
+            case 'new-settings':
+              settingsModel.addOrUpdateToCollection(1, content);
               break;
-            case 'new-rollback' || 'rollback':
-              settingsModel.addToCollection(2, this.settingsJSON);
+            case 'new-rollback':
+              settingsModel.addOrUpdateToCollection(2, content);
+              break;
+            case 'settings':
+              settingsModel.addOrUpdateToCollection(1, content);
+              break;
+            case 'rollback':
+              settingsModel.addOrUpdateToCollection(2, content);
               break;
           }
+          this.navToHome();
         }
       }
     );
@@ -271,8 +279,7 @@ export default class SettingsController extends BaseController {
     rejectButtonText: string,
     typePrimary: string,
     typeSecondary: string,
-    callback: (buttonPressed: string) => void
-) {
+    callback: (buttonPressed: string) => void) {
     const oView = this.getView();
     let oDialog = oView.byId("popupDialog");
 
@@ -288,13 +295,12 @@ export default class SettingsController extends BaseController {
     oDialog.setModel(oSettingsModel, "settings");
 
     oDialog.attachAfterClose(() => {
-        // Use a flag to identify which button was pressed
         const buttonPressed = oDialog.data("buttonPressed");
         callback(buttonPressed);
     });
 
     oDialog.open();
-}
+  }
 
   onPrimaryPress(){
     const oDialog = this.byId("popupDialog") as any;
@@ -307,5 +313,4 @@ export default class SettingsController extends BaseController {
     oDialog.data("buttonPressed", "secondary");
     oDialog.close();
   }
-
 }
