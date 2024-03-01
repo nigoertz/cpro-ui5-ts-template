@@ -10,7 +10,6 @@ export default class Helper {
                 const value = jsonObject[property];
 
                 if (typeof value === "object" && value !== null) {
-                    //if (property === "sap" || property === "shipcloud") {
                     const topLevelItem: any = {
                         property: property,
                         value: "",
@@ -22,7 +21,6 @@ export default class Helper {
                     );
                     topLevelItem.children = childItems;
                     result.push(topLevelItem);
-                    //}
                 }
             }
         }

@@ -3,6 +3,9 @@ import { settingsModel, messageModel } from '../model/provider';
 import Event from 'sap/ui/base/Event';
 import JSONModel from 'sap/ui/model/json/JSONModel';
 import Helper from './Helper';
+import ResizeHandler from 'sap/ui/core/ResizeHandler';
+import MessageToast from 'sap/m/MessageToast';
+import Cookies from 'js-cookie';
 
 /**
  * @namespace cpro.ui5.__kunde__.__projekt__.controller.Settings
@@ -15,92 +18,86 @@ export default class SettingsController extends BaseController {
   onInit() {
     this.performInitalization();
 
-    this.getView().addEventDelegate({
-      onAfterShow: this.onAfterShowHandler.bind(this)
-    });
+    //Once initialized, values may change. By utilizing the onAfterShowHandler, we can easily 
+    //reinitialize everytime we visit the view:
+    this.getView().addEventDelegate({ onAfterShow: this.onAfterShowHandler.bind(this) });
   }
 
   onAfterShowHandler() {
     this.performInitalization();
+    ResizeHandler.register(this.getView().getDomRef(), this.onResize.bind(this));
   }
 
   performInitalization(){
-    const parts = window.location.href.split("/");
-    this.routeName = parts[parts.length - 1];
-
     settingsModel.register(this);
     messageModel.register(this);
-
-    let route = this.getRouter().getRoute(this.routeName);
-    let title;
-    let isDeleteButtonVisible = true;
-    const oResourceBundle = this.getOwnerComponent().getModel("i18n").getResourceBundle();
-
-    switch (this.routeName) {
-      case 'settings':
-        title = oResourceBundle.getText("view-modify-settings");
-        break;
-      case 'new-settings':
-        title = oResourceBundle.getText("view-create-settings");
-        isDeleteButtonVisible = false;
-        break;
-      case 'rollback':
-        title = oResourceBundle.getText("view-modify-rollback");
-        break;
-      case 'new-rollback':
-        title = oResourceBundle.getText("view-create-rollback");
-        isDeleteButtonVisible = false;
-        break;
-    }
+    
+    // Takes the url and splits it to it's route
+    const parts = window.location.href.split("/");
+    this.routeName = parts[parts.length - 1];
+    
+    // Sets the title of the Settings.view
+    const titleMapping = {
+      'settings': 'view-modify-settings',
+      'new-settings': 'view-create-settings',
+      'rollback': 'view-modify-rollback',
+    };
 
     const oViewModel = new JSONModel({
-      title: title,
-      isDeleteButtonVisible: isDeleteButtonVisible,
+      title: this.getOwnerComponent().getModel("i18n").getResourceBundle().getText(titleMapping[this.routeName]),
+      editable: this.routeName === 'rollback' ? false : true
     });
 
     this.getView().setModel(oViewModel, "view");
 
+    // Promise for JSON loading
     const getSettingsJSONPromise = new Promise<void>((resolve) => {
-      route.attachPatternMatched((oEvent: Event) => {
-        this.getSettingsJSON(oEvent).then(() => {
+      this.getRouter().getRoute(this.routeName).attachPatternMatched((oEvent: Event) => {
+        this.getSettingsJSON().then(() => {
           resolve();
         });
       }, this);
     });
   
+    // Sets the flattend model for the TreeTable and the codeeditor
     getSettingsJSONPromise.then(() => {
       const oData = new Helper().flattenJSON(this.settingsJSON);
       const oModel = new JSONModel(oData);
       this.getView().setModel(oModel);
-    });
+      this.loadTreeTable();
+      this.onResize();
+    }); 
   }
-
-  async getSettingsJSON(oEvent: Event): Promise<void> {
-    const collection = await settingsModel.getCollection();
+ 
+  async getSettingsJSON(): Promise<void> {
+    let content = {};
 
     switch (this.routeName) {
-      case 'settings':
-        settingsModel.setModelFromCollection(1);
-        this.settingsJSON = collection[1]?.content;
-        break;
       case 'new-settings':
+        content = settingsModel.getCollection().find(element => element.id === 0)?.content;
         settingsModel.setModelFromCollection(0);
-        this.settingsJSON = collection[0]?.content;
+        break;
+      case 'settings':
+        content = settingsModel.getCollection().find(element => element.id === 1)?.content;
+        settingsModel.setModelFromCollection(1);
         break;
       case 'rollback':
+        content = settingsModel.getCollection().find(element => element.id === 2)?.content;
         settingsModel.setModelFromCollection(2);
-        this.settingsJSON = collection[2]?.content;
-        break;
-      case 'new-rollback':
-        settingsModel.setModelFromCollection(0);
-        this.settingsJSON = collection[0]?.content;
         break;
     }
 
+    if (content === undefined) {
+      this.navToHome();
+    } else {
+      this.settingsJSON = content;
+    }
+
+    // Hides the code editor initially
     this.getView().getModel("todo").setProperty("/codeEditorVisible", false);
   }
 
-  onUpdateInputField(oEvent: Event) {
+  onUpdateValueInputField(oEvent: Event) {
     this.handleInputChange(oEvent, "value");
   }
 
@@ -110,207 +107,116 @@ export default class SettingsController extends BaseController {
 
   handleInputChange(oEvent: Event, propertyType: string) {
     const oInput = oEvent.getSource();
-    const sValue = oInput.getValue();
-    const oContext = oInput.getBindingContext();
-    const sPath = oContext.getPath();
     const propertyName = (propertyType === "property") ? "property" : "value";
+    oInput.getModel().setProperty(oInput.getBindingContext().getPath() + "/" + propertyName, oInput.getValue());
+    this.loadTreeTable();
+  }
 
-    oInput.getModel().setProperty(sPath + "/" + propertyName, sValue);
-
+  loadTreeTable(){
     const oTreeTable = this.getView().byId("TreeTableBasic");
     var unflattendJSON = new Helper().unflattenJSON(oTreeTable.getModel().oData);
     this.getView().getModel("todo").setProperty("/activeItem/content", JSON.stringify(unflattendJSON, null, 2));
   }
-
+  
   toggleCodeEditor(){
     var oModel = this.getView().getModel("todo");
     var bCodeEditorVisible = oModel.getProperty("/codeEditorVisible");
     oModel.setProperty("/codeEditorVisible", !bCodeEditorVisible);
   }
 
-  onActivate() {
-    var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
-    this.openDialog(
-      oResourceBundle.getText(this.routeName === "rollback" || this.routeName === "new-rollback" ? "dialog-text-activate-rollback" : "dialog-text-activate-setting"),
-      oResourceBundle.getText("label-activate"),
-      oResourceBundle.getText("label-cancel"),
-      "Emphasized",
-      "Transparent",
-      (buttonPressed) => {
-        if (buttonPressed === "primary") {
-          let content = this.getView().getModel("todo").getProperty("/activeItem/content");
-
-          switch (this.routeName) {
-            case 'new-settings':
-              settingsModel.addOrUpdateToCollection(1, content);
-              settingsModel.setSettingsActive(1);
-              break;
-            case 'new-rollback':
-              settingsModel.addOrUpdateToCollection(2, content);
-              settingsModel.setSettingsActive(2);
-              break;
-            case 'settings':
-              settingsModel.setSettingsActive(1);
-              break;
-            case 'rollback':
-              settingsModel.setSettingsActive(2);
-              break;
-          }
-          this.navToHome();
-        }
-    });
-  }
-
-  onConvert(){
-    var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
-    this.openDialog(
-      oResourceBundle.getText(this.routeName === "rollback" || this.routeName === "new-rollback" ?
-        "dialog-text-use-as-setting" : 
-        "dialog-text-use-as-rollback"
-      ),
-      oResourceBundle.getText("label-convert"),
-      oResourceBundle.getText("label-cancel"),
-      "Emphasized",
-      "Transparent",
-      (buttonPressed) => {
-        if (buttonPressed === "primary") {
-          let content = this.getView().getModel("todo").getProperty("/activeItem/content");
-
-          switch (this.routeName) {
-            case 'new-settings':
-              settingsModel.addOrUpdateToCollection(2, content);
-              break;
-            case 'new-rollback':
-              settingsModel.addOrUpdateToCollection(1, content);
-              break;
-            case 'settings':
-              settingsModel.addOrUpdateToCollection(2, content);
-              break;
-            case 'rollback':
-              settingsModel.addOrUpdateToCollection(1, content);
-              break;
-          }
-          this.navToHome();
-        }
-      }
-    );
-  }
-
-  onDelete(){
-    var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
-    this.openDialog(
-      oResourceBundle.getText(this.routeName === "rollback" || this.routeName === "new-rollback" ?
-        "dialog-text-delete-rollback" : 
-        "dialog-text-delete-setting"
-      ),
-      oResourceBundle.getText("label-delete"),
-      oResourceBundle.getText("label-cancel"),
-      "Reject",
-      "Emphasized",
-      (buttonPressed) => {
-        if (buttonPressed === "primary") {
-          switch (this.routeName) {
-            case 'settings':
-              settingsModel.deleteFromCollection(1);
-              break;
-            case 'rollback':
-              settingsModel.deleteFromCollection(2);
-              break;
-          }
-          this.navToHome();
-        }
-      }
-    );
-  }
-
-  onSave() {
-    var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
-    this.openDialog(
-      oResourceBundle.getText("dialog-text-accept-changes"),
-      oResourceBundle.getText("label-save"),
-      oResourceBundle.getText("label-cancel"),
-      "Accept",
-      "Default",
-      (buttonPressed) => {
-        if (buttonPressed === "primary") {
-
-          let content = this.getView().getModel("todo").getProperty("/activeItem/content");
-          
-          switch (this.routeName) {
-            case 'new-settings':
-              settingsModel.addOrUpdateToCollection(1, content);
-              break;
-            case 'new-rollback':
-              settingsModel.addOrUpdateToCollection(2, content);
-              break;
-            case 'settings':
-              settingsModel.addOrUpdateToCollection(1, content);
-              break;
-            case 'rollback':
-              settingsModel.addOrUpdateToCollection(2, content);
-              break;
-          }
-          this.navToHome();
-        }
-      }
-    );
-  }
-
-  onReject(){
-    var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
-    this.openDialog(
-      oResourceBundle.getText("dialog-text-discard-changes"),
-      oResourceBundle.getText("label-discard"),
-      oResourceBundle.getText("label-cancel"),
-      "Reject",
-      "Emphasized",
-      (buttonPressed) => {
-        if (buttonPressed === "primary") {
-            this.performInitalization();
-            this.navToHome();
-        } 
-      }
-    );
-  }
-
-  openDialog(
-    title: string,
-    emphasizedButtonText: string,
-    rejectButtonText: string,
-    typePrimary: string,
-    typeSecondary: string,
-    callback: (buttonPressed: string) => void) {
-    const oView = this.getView();
-    let oDialog = oView.byId("popupDialog");
-
-    var oSettingsData = {
-        title: title,
-        emphasizedButtonText: emphasizedButtonText,
-        rejectButtonText: rejectButtonText,
-        typePrimary: typePrimary,
-        typeSecondary: typeSecondary
-    };
-
-    var oSettingsModel = new JSONModel(oSettingsData);
-    oDialog.setModel(oSettingsModel, "settings");
-
-    oDialog.attachAfterClose(() => {
-        const buttonPressed = oDialog.data("buttonPressed");
-        callback(buttonPressed);
-    });
-
-    oDialog.open();
-  }
-
-  onPrimaryPress(){
+  onSavePress(){
     const oDialog = this.byId("popupDialog") as any;
     oDialog.data("buttonPressed", "primary");
     oDialog.close();
   }
 
-  onSecondaryPress(){
+  onCancelSavePress(){
     const oDialog = this.byId("popupDialog") as any;
-    oDialog.data("buttonPressed", "secondary");
     oDialog.close();
   }
+
+  onResetPress(){
+    const oDialog = this.byId("resetDialog") as any;
+    oDialog.data("buttonPressed", "primary");
+    oDialog.close();
+  }
+
+  onCancelResetPress(){
+    const oDialog = this.byId("resetDialog") as any;
+    oDialog.close();
+  }
+ 
+  onSaveNew() {
+    let oDialog = this.getView().byId("popupDialog");
+   
+    oDialog.attachAfterClose(() => {
+      const buttonPressed = oDialog.data("buttonPressed");
+      if (buttonPressed === "primary") {
+        let content = this.getView().getModel("todo").getProperty("/activeItem/content");
+        this.updateSettings(1, content);
+      }
+    });
+  
+    oDialog.open();
+  }
+
+  onReset(){
+    let oDialog = this.getView().byId("resetDialog");
+
+    oDialog.attachAfterClose(() => {
+      const buttonPressed = oDialog.data("buttonPressed");
+      if (buttonPressed === "primary") {
+        let content = settingsModel.getCollection().find(e => e.id === 0).content;
+        this.updateSettings(1, content)
+      }
+    });
+
+    oDialog.open();
+  }
+
+  updateSettings(id:int, content:any){
+    var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
+
+    const routeNameMapping = {
+      'new-settings': 1,
+      'settings': 1,
+      'rollback': 2,
+    };
+    
+    let target = routeNameMapping[this.routeName];
+    let url = target === 1 ? "/api/cpro/settings/systems" : "/api/cpro/settings/systems/revert-changes";
+
+    $.ajax({
+      type: "POST",
+      url: Cookies.get('current_server_url') + url,
+      data: content,
+      headers: {
+        Authorization: Cookies.get('access_token').value
+      },
+      contentType: "application/json",
+      success: function (res, status, xhr) {
+        settingsModel.addOrUpdateToCollection(id, content);
+        MessageToast.show(oResourceBundle.getText("table-settings-column-active"));
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        MessageToast.show(oResourceBundle.getText(errorThrown));
+      }
+    });
+
+  }
+
+  onResize(){
+    var rowHeight = 39;
+    var innerWidth = 1280;
+    
+    var heightWithoutHEaderAndFooter = window.innerHeight - 88;
+    var newTreeTableColumnCount = Math.round((heightWithoutHEaderAndFooter - (rowHeight * 2)) / rowHeight)
+    var newEditorHeight = (newTreeTableColumnCount + 1) * rowHeight + 3;
+
+    this.getView().getModel("todo").setProperty("/treeTableRowCount", newTreeTableColumnCount);
+    this.getView().getModel("todo").setProperty("/codeEditorHeight", newEditorHeight.toString() + "px");
+    this.getView().getModel("todo").setProperty("/treeTableColumnWidth",  (innerWidth / 4).toString() + "px");
+    this.getView().getModel("todo").setProperty("/codeEditorWidth",  (innerWidth / 2).toString() + "px");
+  }
+  
 }

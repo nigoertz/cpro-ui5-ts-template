@@ -6,35 +6,27 @@
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:grid="sap.ui.layout.cssgrid"
 	xmlns:f="sap.f"
-	xmlns:t="sap.tnt">
-
+	xmlns:t="sap.tnt"
+	xmlns:code="sap.ui.codeeditor">
 	<Page backgroundDesign="Transparent">
-		
 		<customHeader>
 			<OverflowToolbar>
 				<Image src="assets/logo.jpg" height="30px" />
-				<Title text="{i18n>app-title}" />
 				<ToolbarSpacer />
 				<Button icon="sap-icon://key-user-settings" tooltip="Administration" press="openSettings" />
 			</OverflowToolbar>
 		</customHeader>
-		
 		<Panel width="100%" backgroundDesign="Transparent">
 			<content>
+				<core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Login" type="XML"/>
 				<f:GridList id="gridList" items="{/items}">
-					<f:GridListItem highlight="{stateColorHightlight}" press="onGridItemPress">
-						<HBox class="sapUiSmallMargin" justifyContent="End">
-							<t:InfoLabel 
-								text="{stateText}" 
-								colorScheme="{stateColorInfoLabel}"/>
-						</HBox>
-						<VBox alignItems="Center" class="sapUiMediumMarginBottom">
+					<f:GridListItem press="onGridItemPress" visible="{visible}">
+						<VBox alignItems="Center" class="sapUiSmallMargin">
 							<Button text="{title}" press="onGridItemPress" type="Ghost" icon="{icon}"></Button>
 						</VBox>
 					</f:GridListItem>
 				</f:GridList>
 			</content>
 		</Panel>
-
 	</Page>
 </mvc:View>

@@ -96,11 +96,6 @@
           "target": ["rollback"]
         },
         {
-          "pattern": "new-rollback",
-          "name": "new-rollback",
-          "target": ["new-rollback"]
-        },
-        {
           "pattern": "about",
           "name": "about",
           "target": ["about"]
@@ -125,11 +120,6 @@
         "rollback": {
           "viewName": "settings",
           "viewId": "rollback",
-          "viewLevel": 2
-        },
-        "new-rollback": {
-          "viewName": "settings",
-          "viewId": "new-rollback",
           "viewLevel": 2
         },
         "about": {

@@ -9,60 +9,52 @@
     xmlns:ui="sap.ui.unified"
     xmlns:l="sap.ui.layout"
     xmlns:code="sap.ui.codeeditor">
-    <m:Page 
-        navButtonPress="navToHome" 
-        showNavButton="true" 
-        title="{view>/title}">
-
+    <m:Page navButtonPress="navToHome" showNavButton="true" title="{view>/title}">
         <m:headerContent>
             <m:Button icon="sap-icon://syntax" type="Ghost" press="toggleCodeEditor" />
         </m:headerContent>
 
-        <m:content>
+        <m:content id="pageContent">
             <core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Dialog" type="XML"/>
-
-            <m:FlexBox width="100%">
+            <core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Login" type="XML"/>
+            <m:FlexBox width="100%" height="{todo>/codeEditorHeight}">
                 <table:TreeTable
                     id="TreeTableBasic"
                     rows="{path: '/', parameters: {arrayNames: ['children']}}"
                     enableSelectAll="false"
-                    selectionMode="None">
+                    selectionMode="None"
+                    visibleRowCount="{todo>/treeTableRowCount}">
                     <table:columns>
-                        <table:Column>
+                        <table:Column width="{todo>/treeTableColumnWidth}" resizable="false">
                             <m:Label text="{i18n>tree-table-label}" />
                             <table:template>
-                                <m:Input value="{property}" liveChange="onUpdatePropertyInputField"/>
+                                <m:Input class="customTreeTableInput" value="{property}" liveChange="onUpdatePropertyInputField" editable="false"/>
                             </table:template>
                         </table:Column>
-                        <table:Column>
+                        <table:Column width="{todo>/treeTableColumnWidth}" resizable="false">
                             <table:template>
-                                <m:Input value="{value}" visible="{= ${children}.length === 0}" liveChange="onUpdateInputField"/>
+                                <m:Input class="customTreeTableInput" value="{value}" visible="{= ${children}.length === 0}" liveChange="onUpdateValueInputField" editable="{view>/editable}"/>
                             </table:template>
                         </table:Column>
                     </table:columns>
                 </table:TreeTable>
-            
+
                 <code:CodeEditor
                     id="CodeEditorBasic"
-                    width="640px"
-                    height="500px"
+                    width="{todo>/codeEditorWidth}"
+                    height="{todo>/codeEditorHeight}"
                     type="json"
                     value="{path: 'todo>/activeItem/content'}"
                     editable="False"
                     visible="{todo>/codeEditorVisible}">
                 </code:CodeEditor>
-
             </m:FlexBox>
         </m:content>
-
         <m:footer>
             <m:OverflowToolbar>
-                <m:Button text="{i18n>label-activate}" type="Emphasized" press="onActivate" />
-                <m:Button text="{i18n>label-convert}"  type="Ghost"      press="onConvert" />
-                <m:Button icon="sap-icon://delete" type="Reject"     press="onDelete" visible="{view>/isDeleteButtonVisible}"/>
                 <m:ToolbarSpacer />
-                <m:Button text="{i18n>label-save}"     type="Accept"     press="onSave" />
-                <m:Button text="{i18n>label-cancel}"   type="Reject"     press="onReject" />
+                <m:Button text="{i18n>label-reset}" type="Reject" press="onReset" visible="{view>/editable}"/>
+                <m:Button text="{i18n>label-activate}" type="Accept" press="onSaveNew" />
             </m:OverflowToolbar>
         </m:footer>
     </m:Page>

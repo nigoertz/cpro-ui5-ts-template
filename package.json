@@ -18,6 +18,7 @@
     "@babel/core": "^7.23.2",
     "@babel/preset-env": "^7.23.2",
     "@babel/preset-typescript": "^7.23.2",
+    "@types/js-cookie": "^3.0.6",
     "@types/openui5": "^1.119.1",
     "@ui5/cli": "^3.7.0",
     "babel-preset-transform-ui5": "^7.2.5",
@@ -45,6 +46,7 @@
     ]
   },
   "dependencies": {
+    "js-cookie": "^3.0.5",
     "xlsx": "^0.18.5"
   }
 }

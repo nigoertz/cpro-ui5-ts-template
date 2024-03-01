@@ -1,0 +1,8 @@
+<core:FragmentDefinition xmlns:m="sap.m" xmlns:core="sap.ui.core">
+    <m:Dialog id="resetDialog" title="{i18n>dialog-text-reset-setting-to-boilerplate}">
+        <m:HBox justifyContent="Center">
+            <m:Button text="{i18n>label-reset}" press="onResetPress" type="Reject" class="sapUiSmallMargin"/>          
+            <m:Button text="{i18n>label-cancel}" press="onCancelResetPress" type="Default" class="sapUiSmallMargin"/>
+        </m:HBox>
+    </m:Dialog>
+</core:FragmentDefinition>

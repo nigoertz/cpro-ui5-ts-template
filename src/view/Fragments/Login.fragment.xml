@@ -1,0 +1,29 @@
+<core:FragmentDefinition 
+    xmlns:m="sap.m" 
+    xmlns:core="sap.ui.core" 
+    xmlns:form="sap.ui.layout.form"
+    xmlns:app="cpro.ui5.__kunde__.__projekt__"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:i18n="sap.ui.model.resource.ResourceModel">
+
+    <m:Dialog id="login" title="{i18n>fragment-login-title}">
+        <m:VBox justifyContent="Center" class="sapUiResponsiveMargin">
+            <form:SimpleForm id="loginForm" editable="true" layout="ResponsiveGridLayout">
+                <form:content>
+                    <m:Label labelFor="url" text="{i18n>fragment-login-server}" />
+                    <m:Input id="url" placeholder="http://localhost:3199" type="Text" value="" required="true" liveChange="onInputChange" />
+
+                    <m:Label labelFor="username" text="{i18n>fragment-login-user}" />
+                    <m:Input id="username" placeholder="" type="Text" value="" required="true" liveChange="onInputChange" />
+
+                    <m:Label labelFor="password" text="{i18n>fragment-login-pw}" />
+                    <m:Input id="password" placeholder="" type="Password" value="" required="true" liveChange="onInputChange" />
+                </form:content>
+            </form:SimpleForm>
+        </m:VBox>
+    
+        <m:HBox justifyContent="Center">
+            <m:Button press="onAcceptPress" text="{i18n>fragment-login-login}" type="Emphasized" class="sapUiSmallMargin" enabled="{/buttonEnabled}" />
+        </m:HBox>
+    </m:Dialog>
+</core:FragmentDefinition>
