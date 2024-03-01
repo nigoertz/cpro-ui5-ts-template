@@ -167,7 +167,7 @@ export default class SettingsController extends BaseController {
       const buttonPressed = oDialog.data("buttonPressed");
       if (buttonPressed === "primary") {
         let content = settingsModel.getCollection().find(e => e.id === 0).content;
-        this.updateSettings(1, content)
+        this.updateSettings(1, JSON.stringify(content, null, 2));
       }
     });
 
@@ -185,6 +185,8 @@ export default class SettingsController extends BaseController {
     
     let target = routeNameMapping[this.routeName];
     let url = target === 1 ? "/api/cpro/settings/systems" : "/api/cpro/settings/systems/revert-changes";
+
+    console.log(url, target, content, id);
 
     $.ajax({
       type: "POST",

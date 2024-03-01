@@ -16,7 +16,7 @@
 
         <m:content id="pageContent">
             <core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Dialog" type="XML"/>
-            <core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Login" type="XML"/>
+            <core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Reset" type="XML"/>
             <m:FlexBox width="100%" height="{todo>/codeEditorHeight}">
                 <table:TreeTable
                     id="TreeTableBasic"

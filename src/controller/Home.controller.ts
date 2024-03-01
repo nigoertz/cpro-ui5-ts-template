@@ -101,6 +101,21 @@ export default class HomeController extends BaseController {
     context.settingsTitle = oResourceBundle.getText("grid-item-current");
     context.rollbackTitle = oResourceBundle.getText("grid-item-rollback");
        
+    // factory laden
+    $.ajax({
+      type: "GET",
+      url: context.server + "/api/cpro/settings/systems/factory",
+      headers: {
+        Authorization: Cookies.get('access_token')
+      },
+      success: function (res, status, xhr) {
+        settingsModel.addOrUpdateToCollection(0, res);
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        context.MessageToast(jqXHR, textStatus, errorThrown);
+      }
+    });
+
     // settings laden
     $.ajax({
       type: "GET",
