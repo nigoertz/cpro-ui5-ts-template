@@ -100,71 +100,46 @@ export default class HomeController extends BaseController {
     const oResourceBundle = context.getOwnerComponent().getModel("i18n").getResourceBundle();
     context.settingsTitle = oResourceBundle.getText("grid-item-current");
     context.rollbackTitle = oResourceBundle.getText("grid-item-rollback");
-       
-    // factory laden
-    $.ajax({
-      type: "GET",
-      url: context.server + "/api/cpro/settings/systems/factory",
-      headers: {
-        Authorization: Cookies.get('access_token')
-      },
-      success: function (res, status, xhr) {
-        settingsModel.addOrUpdateToCollection(0, res);
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        context.MessageToast(jqXHR, textStatus, errorThrown);
-      }
-    });
-
-    // settings laden
-    $.ajax({
-      type: "GET",
-      url: context.server + "/api/cpro/settings/systems/",
-      headers: {
-        Authorization: Cookies.get('access_token')
-      },
-      success: function (res, status, xhr) {
-        if (res !== undefined && res !== null && Object.keys(res).length !== 0){
-          settingsModel.addOrUpdateToCollection(1, res);
-        }
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        context.MessageToast(jqXHR, textStatus, errorThrown);
-      }
-    });
-
-    // backup laden
-    $.ajax({
-      type: "GET",
-      url: context.server + "/api/cpro/settings/systems/backup",
-      headers: {
-        Authorization: Cookies.get('access_token')
-      },
-      success: function (res, status, xhr) {
-        if (res !== undefined && res !== null && Object.keys(res).length !== 0){
-          settingsModel.addOrUpdateToCollection(2, res);
-        
-          var gritItems = `{"items": [{
-            "title": "${context.settingsTitle}",
-            "icon": "sap-icon://action-settings",
-            "function": "toSetting",
-            "visible": true
-          },{
-            "title": "${context.rollbackTitle }",
-            "icon": "sap-icon://undo",
-            "function": "toRollback",
-            "visible": ${res !== undefined && res !== null && Object.keys(JSON.parse(res)).length !== 0}
-          }]}`
+         
+    this.loadData("factory", 0);
+    this.loadData("", 1);
+    this.loadData("backup", 2, function(response){
+      var gritItems = `{"items": [{
+        "title": "${context.settingsTitle}",
+        "icon": "sap-icon://action-settings",
+        "function": "toSetting",
+        "visible": true
+      },{
+        "title": "${context.rollbackTitle }",
+        "icon": "sap-icon://undo",
+        "function": "toRollback",
+        "visible": ${response !== undefined && response !== null && Object.keys(JSON.parse(response)).length !== 0}
+      }]}`
   
-          var oModel = new JSONModel(JSON.parse(gritItems));
-          context.getView().setModel(oModel);
-        }
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        context.MessageToast(jqXHR, textStatus, errorThrown);
-      }
+      var oModel = new JSONModel(JSON.parse(gritItems));
+      context.getView().setModel(oModel);
     });
   }
+
+  loadData(endpoint:string, index:int, callback: ((data: any) => void) | null = null) {
+    var context = this;
+    $.ajax({
+      type: "GET",
+      url: context.server + "/api/cpro/settings/systems/" + endpoint,
+      headers: {
+        Authorization: Cookies.get('access_token')
+      },
+      success: function (res, status, xhr) {
+        if (res !== undefined && res !== null && Object.keys(res).length !== 0) {
+          settingsModel.addOrUpdateToCollection(index, res);
+          callback(res);
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        context.MessageToast(jqXHR, textStatus, errorThrown);
+      }
+    });
+  } 
 
   standardizeServerURL(inputUrl: string){
     // Add http:// if not present in the input
