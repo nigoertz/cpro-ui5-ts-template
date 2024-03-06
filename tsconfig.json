@@ -13,7 +13,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "cpro/ui5/__kunde__/__projekt__/*": ["./src/*"]
+      "cpro/ui5//__projekt__/*": ["./src/*"]
     }
   },
   "include": ["./src/**/*", "tsconfig.json"]

@@ -8,7 +8,7 @@ interface Settings {
 let collection:object = [];
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.model.Settings
+ * @namespace cpro.ui5.settings_ui.model.Settings
  */
 export default class SettingsModel extends BaseModel<Settings> {
   setModelFromCollection(id: number) {

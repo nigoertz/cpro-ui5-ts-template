@@ -8,7 +8,7 @@ import Cookies from 'js-cookie';
 import Dialog from 'sap/m/Dialog';
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.controller.Home
+ * @namespace cpro.ui5.settings_ui.controller.Home
  */
 export default class HomeController extends BaseController {
 

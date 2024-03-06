@@ -2,7 +2,7 @@
     xmlns:m="sap.m" 
     xmlns:core="sap.ui.core" 
     xmlns:form="sap.ui.layout.form"
-    xmlns:app="cpro.ui5.__kunde__.__projekt__"
+    xmlns:app="cpro.ui5.settings_ui"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:i18n="sap.ui.model.resource.ResourceModel">
 

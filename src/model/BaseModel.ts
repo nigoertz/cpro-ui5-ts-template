@@ -2,7 +2,7 @@ import Controller from 'sap/ui/core/mvc/Controller';
 import JSONModel from 'sap/ui/model/json/JSONModel';
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.model.BaseModel
+ * @namespace cpro.ui5.settings_ui.model.BaseModel
  */
 export default class BaseModel<T> extends JSONModel {
   private modelName: string;

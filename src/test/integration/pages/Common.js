@@ -3,7 +3,7 @@ sap.ui.define(["sap/ui/test/Opa5"], function (Opa5) {
 
   function getFrameUrl(sHash, sUrlParameters) {
     var sUrl = jQuery.sap.getResourcePath(
-      "cpro/ui5/__kunde__/__projekt__/app",
+      "cpro/ui5//__projekt__/app",
       ".html"
     );
     sHash = sHash || "";
@@ -19,7 +19,7 @@ sap.ui.define(["sap/ui/test/Opa5"], function (Opa5) {
   }
 
   return Opa5.extend(
-    "cpro.ui5.__kunde__.__projekt__.test.integration.pages.Common",
+    "cpro.ui5.settings_ui.test.integration.pages.Common",
     {
       iStartTheApp: function (oOptions) {
         oOptions = oOptions || {};

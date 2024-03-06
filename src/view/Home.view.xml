@@ -1,5 +1,5 @@
 <mvc:View 
-	controllerName="cpro.ui5.__kunde__.__projekt__.controller.Home" 
+	controllerName="cpro.ui5.settings_ui.controller.Home" 
 	displayBlock="true" 
 	xmlns="sap.m" 
 	xmlns:core="sap.ui.core" 
@@ -18,7 +18,7 @@
 		</customHeader>
 		<Panel width="100%" backgroundDesign="Transparent">
 			<content>
-				<core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Login" type="XML"/>
+				<core:Fragment fragmentName="cpro.ui5.settings_ui.view.Fragments.Login" type="XML"/>
 				<f:GridList id="gridList" items="{/items}">
 					<f:GridListItem press="onGridItemPress" visible="{visible}">
 						<VBox alignItems="Center" class="sapUiSmallMargin">

@@ -5,7 +5,7 @@ export type AppUserLanguage = 'de' | 'en';
 type AppUserTheme = 'sap_fiori_3' | 'sap_fiori_3_dark';
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.model.Config
+ * @namespace cpro.ui5.settings_ui.model.Config
  */
 export default class ConfigModel extends BaseModel<any> {
   private localStorageThemeKey: string = 'cpro-ui5-user-theme';

@@ -5,7 +5,7 @@ sap.ui.define(
 
     Opa5.extendConfig({
       arrangements: new Startup(),
-      viewNamespace: "cpro.ui5.__kunde__.__projekt__.view.",
+      viewNamespace: "cpro.ui5.settings_ui.view.",
       autoWait: true,
     });
   }

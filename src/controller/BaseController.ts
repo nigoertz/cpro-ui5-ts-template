@@ -7,13 +7,13 @@ import Popover from 'sap/m/Popover';
 import Fragment from 'sap/ui/core/Fragment';
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.controller.BaseController
+ * @namespace cpro.ui5.settings_ui.controller.BaseController
  */
 export default class BaseController extends Controller {
   private settingsPopoverPath: string =
-    'cpro/ui5/__kunde__/__projekt__/view/Fragments/Settings';
+    'cpro/ui5//__projekt__/view/Fragments/Settings';
   private messagesPopoverPath: string =
-    'cpro/ui5/__kunde__/__projekt__/view/Fragments/Messages';
+    'cpro/ui5//__projekt__/view/Fragments/Messages';
 
   private popovers: Record<string, Popover> = {};
 

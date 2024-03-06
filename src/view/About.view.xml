@@ -1,4 +1,4 @@
-<mvc:View controllerName="cpro.ui5.__kunde__.__projekt__.controller.Home" displayBlock="true" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc">
+<mvc:View controllerName="cpro.ui5.settings_ui.controller.Home" displayBlock="true" xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:mvc="sap.ui.core.mvc">
     <Page navButtonPress="navToHome" showNavButton="true" title="{i18n>label-about}">
         <l:BlockLayout background="Dashboard" class="ui-center-container">
             <l:BlockLayoutRow accentCells="Accent1">

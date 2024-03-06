@@ -1,5 +1,5 @@
 <mvc:View 
-    controllerName="cpro.ui5.__kunde__.__projekt__.controller.Settings" 
+    controllerName="cpro.ui5.settings_ui.controller.Settings" 
     xmlns:form="sap.ui.layout.form" 
     displayBlock="true" 
     xmlns:m="sap.m" 
@@ -15,8 +15,8 @@
         </m:headerContent>
 
         <m:content id="pageContent">
-            <core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Dialog" type="XML"/>
-            <core:Fragment fragmentName="cpro.ui5.__kunde__.__projekt__.view.Fragments.Reset" type="XML"/>
+            <core:Fragment fragmentName="cpro.ui5.settings_ui.view.Fragments.Dialog" type="XML"/>
+            <core:Fragment fragmentName="cpro.ui5.settings_ui.view.Fragments.Reset" type="XML"/>
             <m:FlexBox width="100%" height="{todo>/codeEditorHeight}">
                 <table:TreeTable
                     id="TreeTableBasic"

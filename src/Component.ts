@@ -2,7 +2,7 @@ import UIComponent from 'sap/ui/core/UIComponent';
 import { configModel } from './model/provider';
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.Component
+ * @namespace cpro.ui5.settings_ui.Component
  */
 export default class Component extends UIComponent {
   public metadata = {

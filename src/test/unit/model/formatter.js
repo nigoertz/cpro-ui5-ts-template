@@ -1,6 +1,6 @@
 /*global QUnit*/
 
-sap.ui.define(["cpro/ui5/__kunde__/__projekt__/model/formatter"], function () {
+sap.ui.define(["cpro/ui5//__projekt__/model/formatter"], function () {
   "use strict";
 
   QUnit.module("Formatters");

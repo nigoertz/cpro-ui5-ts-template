@@ -2,7 +2,7 @@ sap.ui.define(["sap/ui/test/Opa5"], function (Opa5) {
   "use strict";
 
   return Opa5.extend(
-    "cpro.ui5.__kunde__.__projekt__.test.integration.arrangements.Startup",
+    "cpro.ui5.settings_ui.test.integration.arrangements.Startup",
     {
       iStartMyApp: function (oOptions) {
         oOptions = oOptions || {};
@@ -13,7 +13,7 @@ sap.ui.define(["sap/ui/test/Opa5"], function (Opa5) {
         // start the app UI component
         this.iStartMyUIComponent({
           componentConfig: {
-            name: "cpro.ui5.__kunde__.__projekt__",
+            name: "cpro.ui5.settings_ui",
             async: true,
           },
           hash: oOptions.hash,

@@ -8,7 +8,7 @@ import MessageToast from 'sap/m/MessageToast';
 import Cookies from 'js-cookie';
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.controller.Settings
+ * @namespace cpro.ui5.settings_ui.controller.Settings
  */
 export default class SettingsController extends BaseController {
 

@@ -9,7 +9,7 @@ interface AppMessage {
 }
 
 /**
- * @namespace cpro.ui5.__kunde__.__projekt__.model.Config
+ * @namespace cpro.ui5.settings_ui.model.Config
  */
 export default class ConfigModel extends BaseModel<Message> {
   addInfoMessage(options: AppMessage) {
